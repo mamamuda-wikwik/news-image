@@ -33,9 +33,11 @@ const buf = readFileSync(SRC);
 if (buf.length < 33) fail('entry.png too small to be a PNG');
 const PNG_MAGIC = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
 if (!buf.subarray(0, 8).equals(PNG_MAGIC)) fail('entry.png is not a PNG file');
+if (!buf.subarray(12, 16).equals(Buffer.from('IHDR'))) fail('entry.png has no IHDR chunk');
 if (buf.length > 1024 * 1024) fail(`entry.png is ${buf.length} bytes, over the 1 MiB limit`);
 const width = buf.readUInt32BE(16);
 const height = buf.readUInt32BE(20);
+if (width === 0 || height === 0) fail('entry.png has zero width or height');
 if (width > 1024 || height > 1024) fail(`entry.png is ${width}x${height}, over the 1024x1024 limit`);
 
 const out = outDir();
